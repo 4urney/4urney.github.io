@@ -355,124 +355,144 @@
       
         <!-- Add New Data Source Section -->
         <div class="section">
-          <h3>Add New Data Source</h3>
-          <label for="data-source-name">Data Source Name</label>
-          <input type="text" id="data-source-name" placeholder="Enter the name of the data source">
-      
-          <label for="data-source-type">Data Source Type</label>
-          <select id="data-source-type">
-            <option value="Database">Database</option>
-            <option value="API">API</option>
-            <option value="File">File (CSV, Excel)</option>
-          </select>
-      
-          <label for="data-source-url">Data Source URL/Path</label>
-          <input type="text" id="data-source-url" placeholder="Enter the URL or file path">
-      
-          <button id="add-data-source-button">Add Data Source</button>
+            <h3>Add New Data Source</h3>
+            <label for="data-source-name">Data Source Name</label>
+            <input type="text" id="data-source-name" placeholder="Enter the name of the data source">
+    
+            <label for="data-source-type">Data Source Type</label>
+            <select id="data-source-type" onchange="handleDataSourceTypeChange()">
+                <option value="Database">Database</option>
+                <option value="API">API</option>
+                <option value="File">File (CSV, Excel)</option>
+            </select>
+    
+            <!-- URL/Path Field -->
+            <div id="data-source-url-section">
+                <label for="data-source-url">Data Source URL/Path</label>
+                <input type="text" id="data-source-url" placeholder="Enter the URL or file path">
+            </div>
+    
+            <!-- File Upload Section -->
+            <div id="file-upload-section" style="display: none;">
+                <button id="import-file-button">Import File</button>
+                <input type="file" id="file-input" accept=".csv,.xlsx" style="display: none;" />
+            </div>
+    
+            <button id="add-data-source-button">Add Data Source</button>
         </div>
-      
-        <!-- Data Source List Section -->
-        <div class="section">
-          <h3>Data Source List</h3>
-          <input type="text" id="search-data-source" placeholder="Search data sources..." onkeyup="filterDataSources()">
-          <table id="data-source-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>URL/Path</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>User Database</td>
-                <td>Database</td>
-                <td>mysql://userdb.example.com</td>
-                <td>
-                  <button class="edit-button">Edit</button>
-                  <button class="delete-button">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>Product API</td>
-                <td>API</td>
-                <td>https://api.example.com/products</td>
-                <td>
-                  <button class="edit-button">Edit</button>
-                  <button class="delete-button">Delete</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    
+        <!-- Preview Table -->
+        <div id="preview-section" style="display: none; margin-top: 20px;">
+            <h4>File Preview (First 10 Rows)</h4>
+            <table border="1" id="preview-table">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
         </div>
-      </div>
-      
-      <script>
-        // Add New Data Source
-        document.getElementById('add-data-source-button').addEventListener('click', function () {
-          const name = document.getElementById('data-source-name').value.trim();
-          const type = document.getElementById('data-source-type').value;
-          const url = document.getElementById('data-source-url').value.trim();
-      
-          if (!name || !url) {
-            alert('Please provide both a name and URL/path for the data source.');
-            return;
-          }
-      
-          const newRow = `
-            <tr>
-              <td>${name}</td>
-              <td>${type}</td>
-              <td>${url}</td>
-              <td>
-                <button class="edit-button">Edit</button>
-                <button class="delete-button">Delete</button>
-              </td>
-            </tr>
-          `;
-      
-          document.querySelector('#data-source-table tbody').insertAdjacentHTML('beforeend', newRow);
-      
-          // Clear inputs
-          document.getElementById('data-source-name').value = '';
-          document.getElementById('data-source-type').value = 'Database';
-          document.getElementById('data-source-url').value = '';
-        });
-      
-        // Edit and Delete Buttons
-        document.getElementById('data-source-table').addEventListener('click', function (e) {
-          if (e.target.classList.contains('delete-button')) {
-            e.target.closest('tr').remove();
-          } else if (e.target.classList.contains('edit-button')) {
-            const row = e.target.closest('tr');
-            const name = row.children[0].textContent;
-            const type = row.children[1].textContent;
-            const url = row.children[2].textContent;
-      
-            // Populate form fields
-            document.getElementById('data-source-name').value = name;
-            document.getElementById('data-source-type').value = type;
-            document.getElementById('data-source-url').value = url;
-      
-            // Remove the row being edited
-            row.remove();
-          }
-        });
-      
-        // Filter Data Sources
-        function filterDataSources() {
-          const search = document.getElementById('search-data-source').value.toLowerCase();
-          const rows = document.querySelectorAll('#data-source-table tbody tr');
-          rows.forEach(row => {
-            const name = row.children[0].textContent.toLowerCase();
-            const type = row.children[1].textContent.toLowerCase();
-            const url = row.children[2].textContent.toLowerCase();
-            row.style.display = name.includes(search) || type.includes(search) || url.includes(search) ? '' : 'none';
-          });
+    </div>
+    
+    <script>
+        function handleDataSourceTypeChange() {
+            const dataSourceType = document.getElementById("data-source-type").value;
+            const urlSection = document.getElementById("data-source-url-section");
+            const fileUploadSection = document.getElementById("file-upload-section");
+    
+            if (dataSourceType === "File") {
+                urlSection.style.display = "none";
+                fileUploadSection.style.display = "block";
+            } else {
+                urlSection.style.display = "block";
+                fileUploadSection.style.display = "none";
+                document.getElementById("preview-section").style.display = "none"; // Hide preview if switching away
+            }
         }
-      </script>
+    
+        document.getElementById("import-file-button").addEventListener("click", () => {
+            document.getElementById("file-input").click();
+        });
+    
+        document.getElementById("file-input").addEventListener("change", handleFileUpload);
+    
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const data = e.target.result;
+                    const fileExtension = file.name.split(".").pop().toLowerCase();
+    
+                    if (fileExtension === "csv") {
+                        previewCSV(data);
+                    } else if (fileExtension === "xlsx") {
+                        previewExcel(data);
+                    }
+                };
+                if (file.name.endsWith(".csv")) {
+                    reader.readAsText(file);
+                } else {
+                    reader.readAsArrayBuffer(file);
+                }
+            }
+        }
+    
+        function previewCSV(data) {
+            const rows = data.split("\n").slice(0, 10); // Get first 10 rows
+            const table = document.getElementById("preview-table");
+            const thead = table.querySelector("thead");
+            const tbody = table.querySelector("tbody");
+    
+            // Clear table
+            thead.innerHTML = "";
+            tbody.innerHTML = "";
+    
+            // Populate table
+            rows.forEach((row, index) => {
+                const cells = row.split(",");
+                const tr = document.createElement("tr");
+                cells.forEach(cell => {
+                    const td = document.createElement(index === 0 ? "th" : "td");
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                if (index === 0) thead.appendChild(tr); // Header row
+                else tbody.appendChild(tr); // Data rows
+            });
+    
+            document.getElementById("preview-section").style.display = "block";
+        }
+    
+        function previewExcel(data) {
+            const workbook = XLSX.read(data, { type: "array" });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const json = XLSX.utils.sheet_to_json(sheet, { header: 1 }).slice(0, 10); // Get first 10 rows
+    
+            const table = document.getElementById("preview-table");
+            const thead = table.querySelector("thead");
+            const tbody = table.querySelector("tbody");
+    
+            // Clear table
+            thead.innerHTML = "";
+            tbody.innerHTML = "";
+    
+            // Populate table
+            json.forEach((row, index) => {
+                const tr = document.createElement("tr");
+                row.forEach(cell => {
+                    const td = document.createElement(index === 0 ? "th" : "td");
+                    td.textContent = cell || ""; // Handle empty cells
+                    tr.appendChild(td);
+                });
+                if (index === 0) thead.appendChild(tr); // Header row
+                else tbody.appendChild(tr); // Data rows
+            });
+    
+            document.getElementById("preview-section").style.display = "block";
+        }
+    </script>
+    
+    <!-- Add this script to handle Excel files -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
       
 
     <div class="tab-content" id="prompt-management">
