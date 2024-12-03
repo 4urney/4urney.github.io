@@ -357,7 +357,7 @@
         <div class="section">
             <h3>Add New Data Source</h3>
             <label for="data-source-name">Data Source Name</label>
-            <input type="text" id="data-source-name" placeholder="Enter the name of the data source">
+            <input type="text" id="data-source-name" placeholder="Enter the name of the data source" style="width: 300px;">
     
             <label for="data-source-type">Data Source Type</label>
             <select id="data-source-type" onchange="handleDataSourceTypeChange()">
@@ -365,6 +365,7 @@
                 <option value="API">API</option>
                 <option value="File">File (CSV, Excel)</option>
             </select>
+            <span id="file-name-display" style="margin-left: 10px; font-style: italic;"></span>
     
             <!-- URL/Path Field -->
             <div id="data-source-url-section">
@@ -373,9 +374,8 @@
             </div>
     
             <!-- File Upload Section -->
-            <div id="file-upload-section" style="display: none;">
-                <button id="import-file-button">Import File</button>
-                <input type="file" id="file-input" accept=".csv,.xlsx" style="display: none;" />
+            <div id="file-upload-section" style="display: none; margin-top: 10px;">
+                <input type="file" id="file-input" accept=".csv,.xlsx" />
             </div>
     
             <button id="add-data-source-button">Add Data Source</button>
@@ -423,26 +423,28 @@
             const dataSourceType = document.getElementById("data-source-type").value;
             const urlSection = document.getElementById("data-source-url-section");
             const fileUploadSection = document.getElementById("file-upload-section");
+            const fileNameDisplay = document.getElementById("file-name-display");
     
             if (dataSourceType === "File") {
                 urlSection.style.display = "none";
                 fileUploadSection.style.display = "block";
+                fileNameDisplay.textContent = ""; // Clear file name display
             } else {
                 urlSection.style.display = "block";
                 fileUploadSection.style.display = "none";
-                document.getElementById("preview-section").style.display = "none"; // Hide preview if switching away
+                fileNameDisplay.textContent = ""; // Clear file name display
+                document.getElementById("preview-section").style.display = "none";
             }
         }
-    
-        document.getElementById("import-file-button").addEventListener("click", () => {
-            document.getElementById("file-input").click();
-        });
     
         document.getElementById("file-input").addEventListener("change", handleFileUpload);
     
         function handleFileUpload(event) {
             const file = event.target.files[0];
+            const fileNameDisplay = document.getElementById("file-name-display");
+    
             if (file) {
+                fileNameDisplay.textContent = `Selected File: ${file.name}`;
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     const data = e.target.result;
@@ -524,12 +526,12 @@
             document.getElementById("data-source-name").value = "";
             document.getElementById("data-source-url").value = "";
             document.getElementById("file-input").value = "";
+            document.getElementById("file-name-display").textContent = "";
         });
     </script>
     
     <!-- Add this script for Excel handling -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
       
 
     <div class="tab-content" id="prompt-management">
