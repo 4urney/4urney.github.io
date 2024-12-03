@@ -298,11 +298,14 @@
         <label for="chatbot-name">Chatbot Name</label>
         <input type="text" id="chatbot-name" value="RainbowBot">
         <label for="avatar">Avatar/Icon</label>
-        <input type="file" id="avatar">
+        <input type="file" id="avatar" accept="image/*">
+        <div id="avatar-preview" style="margin-top: 10px;">
+          <!-- Preview will be displayed here -->
+        </div>
       </div>
       <div class="section">
         <h2>Channels</h2>
-        <button>Add Channel</button> 
+        <button>Add Channel</button>
         <table>
           <thead>
             <tr>
@@ -323,6 +326,28 @@
         </table>
       </div>
     </div>
+    
+    <script>
+      document.getElementById("avatar").addEventListener("change", function (event) {
+        const previewContainer = document.getElementById("avatar-preview");
+        const file = event.target.files[0];
+    
+        // Clear previous preview
+        previewContainer.innerHTML = "";
+    
+        if (file && file.type.startsWith("image/")) {
+          const img = document.createElement("img");
+          img.src = URL.createObjectURL(file);
+          img.style.maxWidth = "100px";
+          img.style.maxHeight = "100px";
+          img.alt = "Avatar Preview";
+          img.onload = () => URL.revokeObjectURL(img.src); // Free memory
+          previewContainer.appendChild(img);
+        } else {
+          previewContainer.textContent = "Selected file is not a valid image.";
+        }
+      });
+    </script>
 
     <div class="tab-content" id="knowledge-base">
         <h2>Data Source Management</h2>
